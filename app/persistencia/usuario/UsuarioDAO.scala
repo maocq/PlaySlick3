@@ -16,6 +16,11 @@ class UsuarioDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
     usuariosdb.result
   }
 
+  def insertar(usuario: Usuario): Future[Option[Long]] = {
+    val insertar = (usuariosdb returning usuariosdb.map(_.id)) += usuario
+    db.run(insertar)
+  }
+
 
   private class Usuarios(tag: Tag)  extends Table[Usuario](tag, "usuarios") {
     def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)

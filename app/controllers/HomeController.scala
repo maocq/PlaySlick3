@@ -22,16 +22,18 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioDAO: UsuarioDAO)
   }
 
   def listar()= Action.async { implicit request: Request[AnyContent]  =>
-    usuarioDAO.listar().map(usuarios => Ok(Json.toJson(usuarios)))
+    usuarioDAO.listar().map{ usuarios => Ok(Json.toJson(usuarios))
+    } recover { case e => InternalServerError("Error") }
   }
 
   def insertar = Action.async(parse.json) { request: Request[JsValue]  =>
     val dto = request.body.validate[Usuario]
     dto.fold(
       error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> JsError.toJson(error)))),
-      dto => Future {
-        Ok(Json.obj("status" ->"OK", "message" -> ("User '"+ dto.email +"' edited.") ))
-      }
+      dto =>
+        usuarioDAO.insertar(dto).map { id =>
+          Ok(Json.obj("status" -> "OK", "message" -> ("Usuario '" + dto.email + "' insertado.")))
+        } recover { case e => InternalServerError("Error") }
     )
   }
 
