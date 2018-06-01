@@ -1,10 +1,9 @@
 package controllers
 
 import dominio.Usuario
+import dominio.repositorios.UsuarioRepositorio
 import infraestructura.TransformadorDTO
 import javax.inject._
-import persistencia.usuario.UsuarioDAO
-import play.api._
 import play.api.libs.json.{JsError, JsValue, Json}
 import play.api.mvc._
 import playslick3.appExecutionContext
@@ -12,7 +11,7 @@ import playslick3.appExecutionContext
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents, usuarioDAO: UsuarioDAO)
+class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: UsuarioRepositorio)
   extends AbstractController(cc) with TransformadorDTO {
 
   implicit val ec: ExecutionContext = appExecutionContext
@@ -22,7 +21,7 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioDAO: UsuarioDAO)
   }
 
   def listar()= Action.async { implicit request: Request[AnyContent]  =>
-    usuarioDAO.listar().map{ usuarios => Ok(Json.toJson(usuarios))
+    usuarioRepositorio.listar().map{ usuarios => Ok(Json.toJson(usuarios))
     } recover { case e => InternalServerError("Error") }
   }
 
@@ -31,7 +30,7 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioDAO: UsuarioDAO)
     dto.fold(
       error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> JsError.toJson(error)))),
       dto =>
-        usuarioDAO.insertar(dto).map { id =>
+        usuarioRepositorio.insertar(dto).map { id =>
           Ok(Json.obj("status" -> "OK", "message" -> ("Usuario '" + dto.email + "' insertado.")))
         } recover { case e => InternalServerError("Error") }
     )

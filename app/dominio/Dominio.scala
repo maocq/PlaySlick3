@@ -1,3 +1,3 @@
 package dominio
 
-case class Usuario(id: Option[Long], firstName: String, lastName: String, email: String)
+case class Usuario(id: Long, nombre: String, apellido: String, email: String)
