@@ -6,6 +6,7 @@
 # An example controller showing a sample home page
 GET      /                           controllers.HomeController.index
 GET      /listar                     controllers.HomeController.listar
+GET      /consultarPost              controllers.HomeController.consultarPost
 POST     /insertar                   controllers.HomeController.insertar
 
 # Map static resources from the /public folder to the /assets URL path

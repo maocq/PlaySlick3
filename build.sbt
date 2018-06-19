@@ -10,6 +10,7 @@ scalaVersion := "2.12.4"
 libraryDependencies += guice
 libraryDependencies ++= Seq(
   evolutions,
+  ws,
   "com.typesafe.play"               %% "play-slick"              % "3.0.0",
   "com.typesafe.play"               %% "play-slick-evolutions"   % "3.0.0",
   "org.postgresql"                  % "postgresql"               % "42.1.4",
