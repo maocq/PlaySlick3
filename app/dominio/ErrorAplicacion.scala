@@ -1,6 +1,6 @@
 package dominio
 
-trait ErrorAplicacion extends Product with Serializable {
+sealed trait ErrorAplicacion extends Product with Serializable {
   val mensaje: String
   val codigoError: String
   val error: Option[Throwable]

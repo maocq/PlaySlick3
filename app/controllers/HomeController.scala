@@ -8,15 +8,13 @@ import infraestructura.http.{ServicioHTTP, TransformadorDTOs, UserDTO}
 import javax.inject._
 import play.api.libs.json.{JsError, JsValue, Json}
 import play.api.mvc._
-import playslick3.appExecutionContext
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: UsuarioRepositorio, http: ServicioHTTP[UserDTO])
+class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: UsuarioRepositorio, http: ServicioHTTP[UserDTO])(implicit ec: ExecutionContext)
   extends AbstractController(cc) with TransformadorDominio with TransformadorDTOs {
 
-  implicit val ec: ExecutionContext = appExecutionContext
 
   def index() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.index())
@@ -32,8 +30,8 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: Usu
     dto.fold(
       error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> JsError.toJson(error)))),
       dto =>
-        usuarioRepositorio.insertar(dto).map { id =>
-          Ok(Json.obj("status" -> "OK", "message" -> ("Usuario '" + dto.email + "' insertado.")))
+        usuarioRepositorio.insertar(dto).map { usuario =>
+          Ok(Json.toJson(usuario))
         } recover { case e => InternalServerError("Error") }
     )
   }
@@ -41,7 +39,7 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: Usu
   def consultarPost() = Action.async { implicit request: Request[AnyContent] =>
     http.consultar("https://jsonplaceholder.typicode.com/posts/1").flatMap(resultado =>
       resultado.fold(
-        error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> error))),
+        error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> error.mensaje))),
         post => Future.successful(Ok(Json.toJson(post)))
       )
     ) recover { case e => InternalServerError("Error") }
@@ -57,7 +55,6 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: Usu
   }
 
   def test: Future[Either[ErrorAplicacion, Int]] = {
-    //Future.successful(Left(ErrorDominio("Error", "20")))
     Future.successful(Right(1))
   }
 

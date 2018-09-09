@@ -14,7 +14,7 @@ class UsuarioDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvid
   import profile.api._
 
   def listar(): Future[Seq[UsuarioRecord]] = db.run {
-    usuariosdb.result
+    usuariosdb.take(100).result
   }
 
   def insertar(usuarioRecord: UsuarioRecord): Future[UsuarioRecord] = {
