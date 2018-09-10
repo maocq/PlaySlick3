@@ -1,23 +1,39 @@
 package controllers
 
-import dominio.ErrorAplicacion.ErrorValidacion
+import cats.implicits._
+import dominio.ErrorAplicacion.ErrorTecnico
+import dominio.TransformadorErrores
 import dominio.comandos.Comando
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ControladorDeComandos(cc: ControllerComponents) (implicit ec: ExecutionContext) extends AbstractController(cc) {
+class ControladorDeComandos(cc: ControllerComponents) (implicit ec: ExecutionContext)
+  extends AbstractController(cc) with TransformadorErrores {
+
+  val logger: Logger = Logger(this.getClass)
 
   def ejecutar(comando: Comando, jsValue:  JsValue): Future[Result] = {
+    logger.info(s"Comando ${comando.getClass.getName} Json: $jsValue")
     comando.ejecutar(jsValue).map(consecuencia => {
       consecuencia.respuesta.fold(
         {
-          case ErrorValidacion(mensaje, _, _, _) => BadRequest(Json.toJson(mensaje))
-          case error => InternalServerError(Json.toJson(error.mensaje))
+          case error@ErrorTecnico(_, _, exc) => {
+            logger.error(s"Error aplicación ${Json.toJson(error)}", exc.getOrElse(new Throwable))
+            InternalServerError(Json.toJson(error))
+          }
+          case error => {
+            logger.error(s"BadRequest ${Json.toJson(error)}", error.error.getOrElse(new Throwable))
+            BadRequest(Json.toJson(error))
+          }
         },
         json => Ok(json)
       )
-    }) recover { case e => InternalServerError(Json.obj("status" ->"ERROR", "message" -> Json.toJson(e.getMessage))) }
+    }) recover { case e => {
+      logger.error(s"Internal server error ${e.getMessage}", e)
+      InternalServerError(Json.toJson(ErrorTecnico("Internal server error", "500", e.some)))
+    }}
   }
 }

@@ -1,4 +1,5 @@
 package dominio.comandos
+
 import cats.implicits._
 import dominio.TransformadorDominio
 import dominio.repositorios.UsuarioRepositorio
