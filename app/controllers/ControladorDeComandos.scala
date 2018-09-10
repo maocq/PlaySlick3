@@ -29,7 +29,10 @@ class ControladorDeComandos(cc: ControllerComponents) (implicit ec: ExecutionCon
             BadRequest(Json.toJson(error))
           }
         },
-        json => Ok(json)
+        json => {
+          logger.info(s"Respuesta ${comando.getClass.getName} Json: $json")
+          Ok(json)
+        }
       )
     }) recover { case e => {
       logger.error(s"Internal server error ${e.getMessage}", e)
