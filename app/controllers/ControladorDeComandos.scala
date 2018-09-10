@@ -21,11 +21,11 @@ class ControladorDeComandos(cc: ControllerComponents) (implicit ec: ExecutionCon
       consecuencia.respuesta.fold(
         {
           case error@ErrorTecnico(_, _, exc) => {
-            logger.error(s"Error aplicación ${Json.toJson(error)}", exc.getOrElse(new Throwable))
+            logger.error(s"Error aplicación ${Json.toJson(error)}", exc.orNull)
             InternalServerError(Json.toJson(error))
           }
           case error => {
-            logger.error(s"BadRequest ${Json.toJson(error)}", error.error.getOrElse(new Throwable))
+            logger.error(s"BadRequest ${Json.toJson(error)}", error.error.orNull)
             BadRequest(Json.toJson(error))
           }
         },
