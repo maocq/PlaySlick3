@@ -8,6 +8,7 @@ GET      /                           controllers.HomeController.index
 GET      /listar                     controllers.HomeController.listar
 GET      /consultarPost              controllers.HomeController.consultarPost
 POST     /insertar                   controllers.HomeController.insertar
+POST     /listarComando              controllers.UsuarioController.listarComando
 
 # Map static resources from the /public folder to the /assets URL path
 GET      /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

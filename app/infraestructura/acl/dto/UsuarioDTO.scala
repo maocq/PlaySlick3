@@ -3,7 +3,7 @@ package infraestructura.acl.dto
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.implicits._
 
-case class UsuarioDTO(nombre: String, apellido: String, email: String) extends DTO {
+case class UsuarioDTO(nombre: String, apellido: String, email: String) extends DTOComando {
 
   def validar: Either[List[String], UsuarioDTO] = {
     val validacion: ValidatedNel[String, UsuarioDTO] = (

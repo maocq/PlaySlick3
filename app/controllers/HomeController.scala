@@ -7,14 +7,14 @@ import dominio.{ErrorAplicacion, TransformadorDominio, Usuario}
 import infraestructura.acl.dto.UsuarioDTO
 import infraestructura.http.{ServicioHTTP, TransformadorDTOs, UserDTO}
 import javax.inject._
-import play.api.libs.json.{ JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: UsuarioRepositorio, http: ServicioHTTP[UserDTO])(implicit ec: ExecutionContext)
-  extends AbstractController(cc) with TransformadorDominio with TransformadorDTOs {
+  extends ControladorDeComandos(cc) with TransformadorDominio with TransformadorDTOs {
 
 
   def index() = Action { implicit request: Request[AnyContent] =>
@@ -26,7 +26,7 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: Usu
     } recover { case e => InternalServerError("Error") }
   }
 
-  def insertar = Action.async(parse.json) { request: Request[JsValue]  =>
+  def insertar = Action.async(parse.json) { implicit request: Request[JsValue]  =>
     val dto = request.body.validate[UsuarioDTO].asEither.leftMap(e => List("Json invalido")).flatMap(_.validar)
     dto.fold(
       error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> Json.toJson(error)))),
