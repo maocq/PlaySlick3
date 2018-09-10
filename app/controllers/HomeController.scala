@@ -4,9 +4,10 @@ import cats.data.EitherT
 import cats.implicits._
 import dominio.repositorios.UsuarioRepositorio
 import dominio.{ErrorAplicacion, TransformadorDominio, Usuario}
+import infraestructura.acl.dto.UsuarioDTO
 import infraestructura.http.{ServicioHTTP, TransformadorDTOs, UserDTO}
 import javax.inject._
-import play.api.libs.json.{JsError, JsValue, Json}
+import play.api.libs.json.{ JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,11 +27,11 @@ class HomeController @Inject()(cc: ControllerComponents, usuarioRepositorio: Usu
   }
 
   def insertar = Action.async(parse.json) { request: Request[JsValue]  =>
-    val dto = request.body.validate[Usuario]
+    val dto = request.body.validate[UsuarioDTO].asEither.leftMap(e => List("Json invalido")).flatMap(_.validar)
     dto.fold(
-      error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> JsError.toJson(error)))),
+      error => Future.successful(BadRequest(Json.obj("status" ->"ERROR", "message" -> Json.toJson(error)))),
       dto =>
-        usuarioRepositorio.insertar(dto).map { usuario =>
+        usuarioRepositorio.insertar(Usuario(0, dto.nombre, dto.apellido, dto.email)).map { usuario =>
           Ok(Json.toJson(usuario))
         } recover { case e => InternalServerError("Error") }
     )
