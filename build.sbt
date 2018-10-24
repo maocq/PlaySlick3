@@ -18,6 +18,8 @@ libraryDependencies ++= Seq(
   "org.typelevel"                   %% "cats-core"               % "1.3.1",
   "com.softwaremill.quicklens"      %% "quicklens"               % "1.4.11",
   "com.chuusai"                     %% "shapeless"               % "2.3.3",
+  "io.monix"                        %% "monix"                   % "2.3.3",
+  "io.monix"                        %% "monix-cats"              % "2.3.3",
   "org.scalatestplus.play"          %% "scalatestplus-play"      % "3.1.2" % Test
 )
 
